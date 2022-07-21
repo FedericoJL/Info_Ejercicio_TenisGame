@@ -8,6 +8,7 @@
     durante el juego. '''
 
 import random
+from re import T
 import time 
 
 class Game():
@@ -19,7 +20,7 @@ class Game():
         self.ganador = None
 
     def puntoPara(self):
-        return random.randint(1,2)
+        return random.randint(1, 2)
     
     def jugar(self):
         ganador = self.puntoPara()
@@ -91,7 +92,7 @@ class Game():
         print('====================')
 
 class Set():
-    def __init__(self, cant_games = 3):
+    def __init__(self, cant_games = 6):
         self.puntosJugador_1 = 0
         self.puntosJugador_2 = 0
 
@@ -107,17 +108,17 @@ class Set():
         while not game_nuevo.fin():
             game_nuevo.jugar()
             game_nuevo.verPuntuacion()
-            time.sleep(2)
+            time.sleep(0)
         
         setattr(self, 'puntosJugador_'+str(game_nuevo.ganador), getattr(self, 'puntosJugador_'+str(game_nuevo.ganador))+1)
 
         self.games.append(game_nuevo)
 
     def verPuntuacion(self):
-        print('====================')
+        print('\n+++++GAME%s++++++++'% (self.game_actual))
         print('JUGADOR 1 | %s ' % (self.puntosJugador_1))
         print('JUGADOR 2 | %s ' % (self.puntosJugador_2))
-        print('====================')
+        print('++++++++++++++++++\n')
 
     def fin(self):
         final = False
@@ -128,10 +129,72 @@ class Set():
             elif self.puntosJugador_2 > self.puntosJugador_1:
                 self.ganador = 2
                 final = True
+            elif self.puntosJugador_1 == self.puntosJugador_2: ###
+                print('\n_-_-_-_TIE BREAK_-_-_-_\n')
+                tieBreak = TieBreakGame()
+                while not tieBreak.finalTB():
+                    tieBreak.jugarTieBreak()
+                    tieBreak.verPuntosTB()
+                self.ganador = tieBreak.ganadorTB
+                final = True
         return final
 
+
+class TieBreakGame():  ###
+    def __init__(self):
+        self.puntosJ1 = 0
+        self.puntosJ2 = 0
+        self.ganadorTB = None
+        self.secuenciaTB = [0, 1, 2, 3, 4, 5, 6, 7]
+
+    def jugarTieBreak(self):
+        self.ganadorTB = random.randint(1, 2)
+
+        if self.ganadorTB == 1:
+            self.puntosJ1 += 1
+        else:
+            self.puntosJ2 += 1
+
+        puntosJ1 = self.secuenciaTB[self.puntosJ1]
+        puntosJ2 = self.secuenciaTB[self.puntosJ2]
+        
+        if puntosJ1 == puntosJ2 == len(self.secuenciaTB)-1:
+            self.secuenciaTB.append(len(self.secuenciaTB)) 
+        elif puntosJ1 > puntosJ2 and puntosJ1 == len(self.secuenciaTB)+1:
+           self.secuenciaTB.append(self.puntosJ1+1)
+        elif puntosJ2 > puntosJ1 and puntosJ2 == len(self.secuenciaTB)+1:
+            self.secuenciaTB.append(self.puntosJ2+1)
+
+    def verPuntosTB(self):
+        if self.ganadorTB == 1:
+            print('Punto para JUGADOR %s' % (self.ganadorTB))
+        else:
+            print('Punto para JUGADOR %s' % (self.ganadorTB))
+
+        print('--------------------------')
+        print('JUGADOR 1 | %s ' % (self.puntosJ1))
+        print('JUGADOR 2 | %s ' % (self.puntosJ2))
+        print('------------------------\n')
+
+
+    def finalTB(self):
+        fin = False
+       
+        if self.puntosJ1 > self.puntosJ2 and (self.puntosJ1 >= len(self.secuenciaTB)-1) or (self.
+        puntosJ2 > self.puntosJ1 and (self.puntosJ2 >= len(self.secuenciaTB)-1)):
+            fin = True
+
+        if fin:
+            if self.puntosJ1 > self.puntosJ2:
+                self.ganadorTB = 1 
+            else:
+                self.ganadorTB = 2    
+        return fin
+        
+
+
 class Partido():
-    def __init__(self, sets=1, games=3):
+    def __init__(self, sets = 3, games = 6):
         self.puntosJ1 = 0
         self.puntosJ2 = 0
 
@@ -144,10 +207,10 @@ class Partido():
         self.set_actual = 0
     
     def verPuntuacion(self):
-        print('=========SET %s ===========' % (self.set_actual))
-        print('JUGADOR 1 | %s ' % (self.puntosJ1))
-        print('JUGADOR 2 | %s ' % (self.puntosJ2))
-        print('====================')
+        print('===========SET %s ===========' % (self.set_actual))
+        print('\tJUGADOR 1 | %s ' % (self.puntosJ1))
+        print('\tJUGADOR 2 | %s ' % (self.puntosJ2))
+        print('============================\n')
 
     def jugar(self):
         for numSet in range(1, self.cantidadSets+1):
@@ -156,7 +219,7 @@ class Partido():
             while not nuevo_set.fin():
                 nuevo_set.jugarSet()
                 nuevo_set.verPuntuacion()
-                time.sleep(2)
+                time.sleep(0)
 
             if nuevo_set.ganador == 1:
                 self.puntosJ1+=1
@@ -179,10 +242,10 @@ print('FIN DEL JUEGO')
 print('GANADOR')
 print('JUGADOR' + str(partido.ganador))
 
-#Implementar Tie Brake:    
-'''Tie Brake>> La partida gana cuando un jugador gana 3 sets. Cada set se gana si un jugador llega a 6 games, 
+#Implementar Tie Break:    
+'''Tie Break>> La partida gana cuando un jugador gana 3 sets. Cada set se gana si un jugador llega a 6 games, 
 siempre y cuando tenga diferencia de 2 games con su contrincante. En caso de que ambos lleguen a 6 games ese 
 set se definirá por Tie brake. Aquí la secuencia de puntos es de 1 en 1 y gana el primero que llega a 7 puntos 
 con diferencia de 2. En caso de llegar a 6-6 el ganador deberá estirarse hasta 8-6 y así sucesivamente.'''
-
+###Tie Break impementado##
 
